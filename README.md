@@ -1,4 +1,5 @@
 # Treasure_hunt
+Состав команды: Парфёнова Лидия
 Pygame for Yandex Lyceum
 Техническое задание
 Название игры: Treasure hunt
