@@ -1,101 +1,45 @@
-import os
-import pygame
+import pygame.mouse
+
 from Constants import *
+from button import Button
 
 
 class Enter:
     def __init__(self):
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        pygame.display.set_caption('Login/registration')
         self.icon = pygame.image.load(os.path.join('images', 'top_user.png'))
-        pygame.display.set_icon(self.icon)
         self.logo_img = pygame.image.load(os.path.join('images', 'logo.png'))
         self.block_ground = pygame.image.load(os.path.join('images', 'grass.png'))
-        self.clock = pygame.time.Clock()
-        pygame.mixer.music.load(os.path.join('music', 'first.mp3'))
+        self.button_1 = ''
 
-    def draw_text(self, text, x, y, font=FONT_38, color=BLACK):
-        text_to_render = pygame.font.Font.render(
-            font,
-            text,
-            1,
-            color)
-        self.screen.blit(text_to_render, (x, y))
-        return text_to_render
-
-    def draw_items(self):
-        self.screen.fill(DARK_GREEN)
-        self.screen.blit(self.logo_img, (((SCREEN_WIDTH - self.logo_img.get_width()) // 2), 0))
-        self.draw_text("Добро пожаловать в игру охота за сокровищами", 0, self.logo_img.get_height(), color=DARK_RED)
-        text_object_1 = self.draw_text("Добро пожаловать в игру охота за сокровищами", 0,
-                                       self.logo_img.get_height(), color=DARK_RED)
-        self.draw_text("Введите своё имя", 25, self.logo_img.get_height() + text_object_1.get_height(),
-                       color=DARK_RED)
-        text_object_2 = self.draw_text("Введите своё имя", 25,
-                                       self.logo_img.get_height() + text_object_1.get_height(), color=DARK_RED)
-        self.draw_text("Введите свою почту", 25, self.logo_img.get_height() +
-                       text_object_2.get_height() + text_object_1.get_height() + 20, color=DARK_RED)
-        self.name_btn = pygame.draw.rect(self.screen, BLUE, [400 + text_object_2.get_width(),
-                                                             self.logo_img.get_height() + text_object_1.get_height(),
-                                                             220, 40])
-        self.draw_text('Сохранить имя', 400 + text_object_2.get_width(), self.logo_img.get_height() +
-                       text_object_1.get_height(), font=FONT_24)
-        self.mail_btn = pygame.draw.rect(self.screen, BLUE, [400 + text_object_2.get_width(),
-                                                             self.logo_img.get_height() +
-                                                             text_object_2.get_height() +
-                                                             text_object_1.get_height() + 20,
-                                                             220, 40])
-        self.draw_text('Сохранить почту', 400 + text_object_2.get_width(), self.logo_img.get_height() +
-                       text_object_1.get_height() + text_object_2.get_height() + 20, font=FONT_24)
-        self.input_name = pygame.draw.rect(self.screen, PINK, [400 - self.name_btn.width - 10 +
-                                                               text_object_2.get_width(),
-                                                               self.logo_img.get_height() + text_object_1.get_height(),
-                                                               220, 40])
-
-        self.input_mail = pygame.draw.rect(self.screen, PINK, [400 - self.mail_btn.width - 10 +
-                                                               text_object_2.get_width(),
-                                                               self.logo_img.get_height() +
-                                                               text_object_2.get_height() +
-                                                               text_object_1.get_height() + 20,
-                                                               220, 40])
+    def draw_items(self, screen):
+        button_1 = Button(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 150, 250, 60, 'Сохранить данные',
+                          'images/button_image.png', hover_image_path='images/button_image_is_hovered.png')
+        self.button_1 = button_1
+        button_1.draw(screen)
 
     def run(self):
         pygame.init()
+        screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        screen.fill(DARK_GREEN)
+        pygame.display.set_caption('Меню')
+        pygame.display.set_icon(self.icon)
+        pygame.mixer.music.load(os.path.join('music', 'first.mp3'))
         pygame.mixer_music.play()
-        run = True
-        active_to_write_name = False
+        enter = Enter()
         alpha = 255
-        user_name_text = ''
+        run = True
+        clock = pygame.time.Clock()
         while run:
-            self.clock.tick_busy_loop(60)
+            clock.tick(FPS)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if pygame.mouse.get_pressed()[0]:
-                        if self.name_btn.collidepoint(pygame.mouse.get_pos()):
-                            pass
-                if event.type == pygame.MOUSEMOTION:
-                    if self.input_name.collidepoint(pygame.mouse.get_pos()):
-                        active_to_write_name = True
-                        print('active_to_write_name')
-                if event.type == pygame.KEYDOWN:
-                    if active_to_write_name:
-                        if event.key == pygame.K_BACKSPACE:
-                            user_name_text += user_name_text[:-1]
-                            self.draw_text(user_name_text, self.input_name.x, self.input_name.y, font=FONT_12)
-
-                            print('pygame.K_BACKSPACE')
-                        else:
-                            user_name_text += event.unicode
-                            self.draw_text(user_name_text, self.input_name.x, self.input_name.y, font=FONT_12)
-
-                            print('event.unicode')
-
-            self.draw_items()
+            self.draw_items(screen)
+            self.button_1.check_hover(pygame.mouse.get_pos())
+            self.button_1.draw(screen)
             if alpha > 0:
-                s = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-                s.fill((0, 0, 0, alpha))
-                self.screen.blit(s, (0, 0))
+                surface_blur = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+                surface_blur.fill((0, 0, 0, alpha))
+                screen.blit(surface_blur, (0, 0))
                 alpha -= 2
-            pygame.display.update()
+            pygame.display.flip()
