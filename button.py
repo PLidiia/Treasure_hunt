@@ -25,10 +25,10 @@ class Button:
             self.sound = pygame.mixer.Sound(sound_path)
         self.is_hovered = False
 
-    def draw(self, screen):
+    def draw(self, screen, font=FONT_24):
         cur_image = self.hover_image if self.is_hovered else self.image
         screen.blit(cur_image, self.rect.topleft)
-        text_surface = FONT_24.render(self.text, True, WHITE)
+        text_surface = font.render(self.text, True, WHITE)
         text_rect = text_surface.get_rect(center=self.rect.center)
         screen.blit(text_surface, text_rect)
 
@@ -36,6 +36,7 @@ class Button:
         """Проверяем коллизию между кнопкой и координатами мыши и сохраняем в атрибут класса
         """
         self.is_hovered = self.rect.collidepoint(mouse_pos)
+        self.image = self.hover_image
 
     def button_event(self, event):
         '''Для событий, происходящих с кнопкой
@@ -44,3 +45,9 @@ class Button:
             pygame.event.post(pygame.event.Event(pygame.USEREVENT, button=self))
         elif event.type == pygame.MOUSEBUTTONUP and self.is_hovered:
             self.is_hovered = False
+
+    def check_click(self, pos):
+        if self.rect.collidepoint(pos):
+            return True
+        else:
+            return False
