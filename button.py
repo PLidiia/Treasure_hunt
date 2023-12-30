@@ -25,10 +25,14 @@ class Button:
             self.sound = pygame.mixer.Sound(sound_path)
         self.is_hovered = False
 
-    def draw(self, screen, font=FONT_24):
+    def draw(self, screen, font=FONT_24, color_font=BLACK):
+        """Метод рисование кнопки по заданным параметрам
+        """
+        # текущее изображение, если мышка была сфокусированна, то меняем на другое изображение
         cur_image = self.hover_image if self.is_hovered else self.image
         screen.blit(cur_image, self.rect.topleft)
-        text_surface = font.render(self.text, True, WHITE)
+        # создаем поверхность, на которой рендерится шрифт со сглаживанием и цветом по умолчанию чёрным
+        text_surface = font.render(self.text, True, color_font)
         text_rect = text_surface.get_rect(center=self.rect.center)
         screen.blit(text_surface, text_rect)
 
