@@ -18,15 +18,14 @@ if __name__ == "__main__":
     inputting_chars = 'Вводятся символы'
     delete_chars = 'Удаляются символы'
     input_name = 'Переключение на введение имени'
-    settings = 'Переход на настройки'
-    translate_fields_menu = []
-    translate_fields_menu.append(long_field)
-    translate_fields_menu.append(successfull_reg)
-    translate_fields_menu.append(user_was)
-    translate_fields_menu.append(wrong_field)
-    translate_fields_menu.append(input_password)
-    translate_fields_menu.append(inputting_chars)
-    translate_fields_menu.append(delete_chars)
-    translate_fields_menu.append(input_name)
-    translate_fields_menu.append(settings)
+    move_to_settings = 'Переход на настройки'
+    title = 'Комментарии'
+    text_input_password = 'Ввести пароль'
+    text_input_name = 'Ввести имя'
+    text_settings = 'Настройки'
+    name = 'Имя'
+    password = 'Пароль'
+    translate_fields_menu = [long_field, successfull_reg, user_was, wrong_field, input_password, inputting_chars,
+                             delete_chars, input_name, move_to_settings, title, text_input_password,
+                             text_input_name, text_settings, name, password]
     entry.run(translate_fields_menu)
