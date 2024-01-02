@@ -143,8 +143,9 @@ class Enter:
         return user_password
 
     def run(self, fields):
-        print('start')
+        print(fields)
         self.translate_fields_menu = self.translate_fields_menu if not fields else fields
+        print(self.translate_fields_menu)
         pygame.init()
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption('Меню')
@@ -234,14 +235,16 @@ class Enter:
             if finish_password:
                 if move_to_password is True and entrance_about is True:
                     # если нажата клавиша enter и пользователь сейчас находится на поле ввода пароля
-                    self.switch_block(1)
+                    self.switch_block(0)
                     if name_intermed_save != '' and password_intermed_save != '':
-                        cur = self.con.cursor()
-                        search_name = cur.execute('''SELECT name FROM USERS WHERE name = ?''',
-                                                  (name_intermed_save,)).fetchone()
-                        if not search_name:
-                            validate_password_user = self.validator(password_intermed_save)
-                            if validate_password_user == password_intermed_save:
+                        validate_password_user = self.validator(password_intermed_save)
+                        # !!! Логика. При вводе пароля не подходящему критериям, выводится сообщение, несмотря
+                        # на то что пароль был неверным по отношению к данному имени
+                        if validate_password_user == password_intermed_save:
+                            cur = self.con.cursor()
+                            search_name = cur.execute('''SELECT name FROM USERS WHERE name = ?''',
+                                                      (name_intermed_save,)).fetchone()
+                            if not search_name:
                                 # если в таблице не было найдено такого имени, то добавляем в таблицу
                                 cur = self.con.cursor()
                                 cur.execute("INSERT INTO USERS (password, name) VALUES (?, ?)",
@@ -251,57 +254,57 @@ class Enter:
                                 self.update_commenting(screen)
                                 self.launch_choice_menu(name_user=name_intermed_save)
                             else:
-                                self.comments_special = validate_password_user
+                                entrance_about = False
+                                self.comments_special = self.translate_fields_menu[2]
+                                self.update_commenting(screen)
+                            check_exist_user = cur.execute(
+                                '''SELECT name FROM USERS WHERE password = ? AND name = ?''',
+                                (password_intermed_save, name_intermed_save)).fetchone()
+                            if check_exist_user:
+                                # уже вошли
+                                entrance_about = False
+                                # все данные есть в таблице и они корректны
+                                self.comments_special = f'{self.translate_fields_menu[15]} {name_intermed_save}'
+                                self.update_commenting(screen)
+                                self.launch_choice_menu(name_user=name_intermed_save)
+                            else:
+                                self.comments_special = self.translate_fields_menu[3]
                                 self.update_commenting(screen)
                         else:
-                            entrance_about = False
-                            self.comments_special = self.translate_fields_menu[2]
-                            self.update_commenting(screen)
-                        check_exist_user = cur.execute(
-                            '''SELECT name FROM USERS WHERE password = ? AND name = ?''',
-                            (password_intermed_save, name_intermed_save)).fetchone()
-                        if check_exist_user:
-                            # уже вошли
-                            entrance_about = False
-                            # все данные есть в таблице и они корректны
-                            self.comments_special = f'{self.translate_fields_menu[15]} {name_intermed_save}'
-                            self.update_commenting(screen)
-                            self.launch_choice_menu(name_user=name_intermed_save)
-                        else:
-                            self.comments_special = self.translate_fields_menu[3]
+                            self.comments_special = validate_password_user
                             self.update_commenting(screen)
                     else:
                         self.comments_special = self.translate_fields_menu[16]
                         self.update_commenting(screen)
-            elif move_to_password is False:
-                # клавиша enter нажата при окончании введении имени, значит будет  введние пароля
-                # переключение на блок введение пароля без нажатия кнопки
-                self.switch_block(1)
-                inputting_data = False
-                move_to_password = True
-                self.comments_special = self.translate_fields_menu[4]
-                self.update_commenting(screen)
-                name_intermed_save = password_intermed_save
-                password_intermed_save = ''
-        if not move_to_password:
-            text = FONT_24.render(name_intermed_save, True, WHITE)
-            screen.blit(text, (SCREEN_WIDTH // 2 - 180, SCREEN_HEIGHT // 2 - 135))
-        else:
-            text = FONT_24.render(password_intermed_save, True, WHITE)
-            screen.blit(text, (SCREEN_WIDTH // 2 - 180, SCREEN_HEIGHT // 2 - 15))
-        if self.current_menu_index_block != 0:
-            text = FONT_24.render(self.translate_fields_menu[13], True, WHITE)
-            screen.blit(text, (SCREEN_WIDTH // 2 - 220, SCREEN_HEIGHT // 2 - 180))
-        else:
-            text = FONT_24.render(self.translate_fields_menu[13], True, PINK)
-            screen.blit(text, (SCREEN_WIDTH // 2 - 220, SCREEN_HEIGHT // 2 - 180))
-        if self.current_menu_index_block != 1 or self.move_to_settings is True:
-            text = FONT_24.render(self.translate_fields_menu[14], True, WHITE)
-            screen.blit(text, (SCREEN_WIDTH // 2 - 220, SCREEN_HEIGHT // 2 - 80))
-        elif move_to_password is True:
-            text = FONT_24.render(self.translate_fields_menu[14], True, PINK)
-            screen.blit(text, (SCREEN_WIDTH // 2 - 220, SCREEN_HEIGHT // 2 - 80))
-        text = FONT_38.render(self.translate_fields_menu[9], True, WHITE)
-        screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 50))
-        self.update_commenting(screen)
-        pygame.display.update()
+                elif move_to_password is False:
+                    # клавиша enter нажата при окончании введении имени, значит будет  введние пароля
+                    # переключение на блок введение пароля без нажатия кнопки
+                    self.switch_block(1)
+                    inputting_data = False
+                    move_to_password = True
+                    self.comments_special = self.translate_fields_menu[4]
+                    self.update_commenting(screen)
+                    name_intermed_save = password_intermed_save
+                    password_intermed_save = ''
+            if not move_to_password:
+                text = FONT_24.render(name_intermed_save, True, WHITE)
+                screen.blit(text, (SCREEN_WIDTH // 2 - 180, SCREEN_HEIGHT // 2 - 135))
+            else:
+                text = FONT_24.render(password_intermed_save, True, WHITE)
+                screen.blit(text, (SCREEN_WIDTH // 2 - 180, SCREEN_HEIGHT // 2 - 15))
+            if self.current_menu_index_block != 0:
+                text = FONT_24.render(self.translate_fields_menu[13], True, WHITE)
+                screen.blit(text, (SCREEN_WIDTH // 2 - 220, SCREEN_HEIGHT // 2 - 180))
+            elif self.current_menu_index_block == 0 or self.move_to_settings is True:
+                text = FONT_24.render(self.translate_fields_menu[13], True, PINK)
+                screen.blit(text, (SCREEN_WIDTH // 2 - 220, SCREEN_HEIGHT // 2 - 180))
+            if self.current_menu_index_block != 1 or self.move_to_settings is True:
+                text = FONT_24.render(self.translate_fields_menu[14], True, WHITE)
+                screen.blit(text, (SCREEN_WIDTH // 2 - 220, SCREEN_HEIGHT // 2 - 80))
+            elif move_to_password is True:
+                text = FONT_24.render(self.translate_fields_menu[14], True, PINK)
+                screen.blit(text, (SCREEN_WIDTH // 2 - 220, SCREEN_HEIGHT // 2 - 80))
+            text = FONT_38.render(self.translate_fields_menu[9], True, WHITE)
+            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 50))
+            self.update_commenting(screen)
+            pygame.display.update()

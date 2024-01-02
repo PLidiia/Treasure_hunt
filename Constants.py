@@ -19,3 +19,4 @@ FONT_24 = pygame.font.Font(file_font, 24)
 FONT_12 = pygame.font.Font(file_font, 12)
 FONT_16 = pygame.font.Font(file_font, 16)
 FONT_24_CLASSIC = pygame.font.Font(None, 24)
+TILE_SIZE = 64

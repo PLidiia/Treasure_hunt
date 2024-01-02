@@ -25,7 +25,15 @@ if __name__ == "__main__":
     text_settings = 'Настройки'
     name = 'Имя'
     password = 'Пароль'
+    successfull_login = 'Вы успешно вошли в аккаунт под именем'
+    empty_field = 'Пустое поле для пароля или имени'
+    nums_in_password = 'Пароль должен содержать цифры'
+    letters_upper_in_password = 'Пароль должен содержать заглавные буквы'
+    letters_lower_in_password = 'Пароль должен содержать строчные буквы'
+    letters_special_in_password = 'Пароль должен содержать специальные символы'
     translate_fields_menu = [long_field, successfull_reg, user_was, wrong_field, input_password, inputting_chars,
                              delete_chars, input_name, move_to_settings, title, text_input_password,
-                             text_input_name, text_settings, name, password]
+                             text_input_name, text_settings, name, password, successfull_login, empty_field,
+                             nums_in_password, letters_upper_in_password, letters_lower_in_password,
+                             letters_special_in_password]
     entry.run(translate_fields_menu)
