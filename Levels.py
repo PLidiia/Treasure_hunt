@@ -35,14 +35,13 @@ class choice_levels:
         clock = pygame.time.Clock()
         running = True
         while running:
+            clock.tick(FPS)
+            screen.fill(DARK_GREEN)
+            buttons = self.draw_items(screen)
             for event in pygame.event.get():
-                clock.tick(FPS)
-                screen.fill(DARK_GREEN)
-                buttons = self.draw_items(screen)
                 if event.type == pygame.QUIT:
                     running = False
                 elif event.type == pygame.MOUSEBUTTONDOWN and buttons[0].check_click(pygame.mouse.get_pos()):
-                    print(Level_1['terrain'])
                     level_1 = Level(self.name_user, Level_1['terrain'])
                     level_1.run()
             pygame.display.update()

@@ -1,13 +1,13 @@
-from csv_work import import_csv_layout
-import pygame
 from Constants import *
-from Tile import Tile
+from Tile import Tile, StaticTile
+from csv_work import import_csv_layout, import_cutting_tiles
 
 
 class Level:
     def __init__(self, name_user, level_data):
         self.name_user = name_user
         self.level_data = level_data
+        self.map_shift = 0
         terrain_layout = import_csv_layout(level_data)
         self.terrain_sprites = self.create_tile_group(terrain_layout, 'terrain')
 
@@ -18,9 +18,12 @@ class Level:
                 if id_tile != '0':
                     x = index_col * TILE_SIZE
                     y = index_row * TILE_SIZE
-                    if type_layout == 'terrain':
-                        sprite = Tile(TILE_SIZE, x, y)
-                        sprite_group_current_layout.add(sprite)
+                    if type_layout == 'terrain' and id_tile != '' and id_tile:
+                        terrain_tile_list = import_cutting_tiles('images/terrain/terrain_tiles.png')
+                        if len(terrain_tile_list) - 1 >= int(id_tile):
+                            tile_surface = terrain_tile_list[int(id_tile)]
+                            sprite = StaticTile(TILE_SIZE, x, y, tile_surface)
+                            sprite_group_current_layout.add(sprite)
         return sprite_group_current_layout
 
     def run(self):
@@ -31,8 +34,9 @@ class Level:
         clock = pygame.time.Clock()
         while running:
             screen.fill(DARK_GREEN)
-            self.terrain_sprites.draw(screen)
             clock.tick(FPS)
+            self.terrain_sprites.draw(screen)
+            self.terrain_sprites.update(-4)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
