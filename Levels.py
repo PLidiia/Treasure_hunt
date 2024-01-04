@@ -42,6 +42,6 @@ class choice_levels:
                 if event.type == pygame.QUIT:
                     running = False
                 elif event.type == pygame.MOUSEBUTTONDOWN and buttons[0].check_click(pygame.mouse.get_pos()):
-                    level_1 = Level(self.name_user, Level_1['terrain'])
+                    level_1 = Level(Level_1)
                     level_1.run()
             pygame.display.update()

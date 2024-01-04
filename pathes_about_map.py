@@ -1,5 +1,6 @@
 Level_1 = {
-    'terrain': 'images/levels/terrain.csv',
-    'med': 'images/levels/med.csv',
-    'tips': 'images/levels/tips.csv'
+    'terrain': 'images/levels/level_0_terrain.csv',
+    'grass': 'images/levels/level_0_grass.csv',
+    'coins': 'images/levels/level_0_coins.csv',
+    'crates': 'images/levels/level_0_crates.csv',
 }

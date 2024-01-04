@@ -17,8 +17,8 @@ def import_cutting_tiles(path):
     tile_num_x = int(surface.get_size()[0] / TILE_SIZE)
     tile_num_y = int(surface.get_size()[1] / TILE_SIZE)
     cut_tiles = []
-    for row in range(tile_num_y):
-        for col in range(tile_num_x):
+    for row in range(tile_num_x):
+        for col in range(tile_num_y):
             x = col * TILE_SIZE
             y = row * TILE_SIZE
             new_surface = pygame.Surface((TILE_SIZE, TILE_SIZE))
