@@ -157,6 +157,9 @@ class Enter:
             return True
 
     def run(self, fields):
+        '''Функция screensaver_before_work работает не совсем корректно в отличие от других окон, это может быть
+        связано с большим объёмом стека событий, что делает запуск данного окна менее плавным, чем
+        например в окнах Settings и Levels'''
         self.translate_fields_menu = self.translate_fields_menu if not fields else fields
         pygame.init()
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -230,9 +233,6 @@ class Enter:
                             self.update_commenting(screen)
                     elif buttons[2].check_click(pos):
                         self.switch_block(0)
-                        if self.double_text(self.translate_fields_menu[8]):
-                            self.comments_special = self.translate_fields_menu[8]
-                            self.update_commenting(screen)
                         move_to_password = False
                         self.move_to_settings = True
                         running = False

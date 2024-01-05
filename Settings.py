@@ -29,6 +29,8 @@ class Setting:
         self.translate_fields_settings = translate_fields_settings
 
     def translate(self, to_lang, from_to_lang='ru'):
+        '''Существует проблема с долгим переводом, происходит зависание окна с подписью "не отвечает"
+        '''
         translator = translate.Translator(from_lang=from_to_lang, to_lang=to_lang)
         self.translator = translator
         for field in self.list_fields_menu:
@@ -37,6 +39,7 @@ class Setting:
         for field in self.translate_fields_settings:
             new_field = self.translator.translate(field)
             self.new_list_fields_settings.append(new_field)
+        self.translate_fields_settings = self.new_list_fields_settings
 
     def draw_buttons(self, screen):
         button_choice_language = Button(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 150, 250, 60,
@@ -62,7 +65,7 @@ class Setting:
         button_eng.draw(screen, font=FONT_24_CLASSIC, color_font=BLUE)
         button_german = Button(SCREEN_WIDTH // 2 + margin,
                                SCREEN_HEIGHT // 2 - 225, 120, 45,
-                               'Немецкий',
+                               self.translate_fields_settings[5],
                                'images/ger.jpg')
         button_german.draw(screen, font=FONT_24_CLASSIC, color_font=BLUE)
         button_fr = Button(SCREEN_WIDTH // 2 + 45, 120, 120, 45, self.translate_fields_settings[6], 'images/fr.png')
@@ -90,10 +93,13 @@ class Setting:
         pygame.display.set_caption(self.translate_fields_settings[7])
         running = True
         drawing_language_menu = False
+        clock = pygame.time.Clock()
         while running:
+            clock.tick(FPS)
+            pygame.display.set_caption(self.translate_fields_settings[7])
             screen.fill(DARK_GREEN)
             if self.alpha > 0:
-                self.alpha = screensaver_before_work(screen, alpha=self.alpha)
+                self.alpha = screensaver_before_work(screen, self.alpha, 5)
             text = FONT_38.render(self.translate_fields_settings[7], True, WHITE)
             screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 25))
             buttons_settings = self.draw_buttons(screen)
@@ -103,7 +109,6 @@ class Setting:
                 if drawing_language_menu is True:
                     buttons_lang = self.draw_language_menu(screen, buttons_settings)
                     if buttons_lang[0].check_click(pygame.mouse.get_pos()):
-                        print('click')
                         self.change_translator = True
                         self.translate('en')
                     elif buttons_lang[1].check_click(pygame.mouse.get_pos()):

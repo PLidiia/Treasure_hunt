@@ -1,7 +1,7 @@
 import csv
 import pygame
 from Constants import *
-
+import os
 
 def import_csv_layout(path):
     terrain_map = []
@@ -25,6 +25,17 @@ def import_cutting_tiles(path):
             new_surface.blit(surface, (0, 0), pygame.Rect(x, y, TILE_SIZE, TILE_SIZE))
             cut_tiles.append(new_surface)
     return cut_tiles
+
+
+def work_with_many_nestings(path):
+    surface_images = []
+    for nesting_count_1, nesting_count_2, images in os.walk(path):
+        for image in images:
+            to_images_path = path + '/' + image
+            surface_image = pygame.image.load(to_images_path).convert_alpha()
+            surface_images.append(surface_image)
+    return surface_images
+
 
 
 
