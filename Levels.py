@@ -4,11 +4,13 @@ from Constants import *
 from button import Button
 from map_1 import Level
 from pathes_about_map import Level_1
+from Effects import screensaver_before_work
 
 
 class choice_levels:
     def __init__(self, name_user):
         self.name_user = name_user
+        self.alpha = 255
 
     def draw_items(self, screen):
         text = FONT_24.render(self.name_user, True, WHITE)
@@ -44,4 +46,6 @@ class choice_levels:
                 elif event.type == pygame.MOUSEBUTTONDOWN and buttons[0].check_click(pygame.mouse.get_pos()):
                     level_1 = Level(Level_1)
                     level_1.run()
+            if self.alpha > 0:
+                self.alpha = screensaver_before_work(screen, self.alpha, 2)
             pygame.display.update()

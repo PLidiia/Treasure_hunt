@@ -5,7 +5,7 @@ pygame.font.init()
 all_sprites = pygame.sprite.Group()
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 700
-FPS = 60
+FPS = 70
 DARK_GREEN = (87, 122, 77)
 DARK_RED = (163, 0, 34)
 BROWN = (77, 8, 4)
