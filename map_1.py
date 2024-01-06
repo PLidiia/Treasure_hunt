@@ -2,7 +2,7 @@ from csv_work import import_csv_layout, import_cutting_tiles
 import random
 
 from Constants import *
-from Tile import StaticTile, Boxes, Coin
+from Tile import StaticTile, Boxes, Coin, Enemy_Only_X, Tile
 from csv_work import import_csv_layout, import_cutting_tiles
 
 
@@ -18,6 +18,10 @@ class Level:
         self.boxes_sprites = self.create_tile_group(boxes_with_treasures, 'boxes')
         coins_layout = import_csv_layout(level_data['coins'])
         self.coins_sprites = self.create_tile_group(coins_layout, 'coins')
+        enemies_layout = import_csv_layout(level_data['enemies'])
+        self.enemies_sprites = self.create_tile_group(enemies_layout, 'enemies')
+        const_blocs_layout = import_csv_layout(level_data['const'])
+        self.const_blocs_sprites = self.create_tile_group(const_blocs_layout, 'const')
         self.start_boxes_coords = []
 
     def create_tile_group(self, layout, type):
@@ -44,9 +48,22 @@ class Level:
 
                     if type == 'coins':
                         sprite = Coin(TILE_SIZE, x, y, 'images/terrain/coins_frames')
+
+                    if type == 'enemies':
+                        sprite = Enemy_Only_X(TILE_SIZE, x, y, 5)
+
+                    if type == 'const':
+                        sprite = Tile(TILE_SIZE, x, y)
+
                     sprite_group.add(sprite)
 
         return sprite_group
+
+    def enemy_collision_with_blocks(self):
+        for enemy_sprite in self.enemies_sprites.sprites():
+            # если враги добежали до ограничавающих блоков констант на каждом куске treasure (земли) они расположены
+            if pygame.sprite.spritecollide(enemy_sprite, self.const_blocs_sprites, False):
+                enemy_sprite.reverse()
 
     def work_with_coords_sprites_boxes(self):
         boxes_coords = []
@@ -81,11 +98,19 @@ class Level:
                 self.start_boxes_coords = start_boxes_coords
             self.terrain_sprites.update(self.world_shift)
             self.terrain_sprites.draw(screen)
+
             self.grass_sprites.update(self.world_shift)
             self.grass_sprites.draw(screen)
+
             self.boxes_sprites.update(self.world_shift)
             self.boxes_sprites.draw(screen)
+
             self.coins_sprites.update(self.world_shift)
             self.coins_sprites.draw(screen)
+
+            self.enemies_sprites.update(self.world_shift)
+            self.const_blocs_sprites.update(self.world_shift)
+            self.enemy_collision_with_blocks()
+            self.enemies_sprites.draw(screen)
             pygame.display.update()
 

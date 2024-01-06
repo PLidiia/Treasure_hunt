@@ -2,6 +2,7 @@ import pygame
 from csv_work import work_with_many_nestings
 from Constants import *
 
+
 class Tile(pygame.sprite.Sprite):
     def __init__(self, size, x, y):
         super().__init__()
@@ -35,13 +36,17 @@ class Tile_With_Animation(Tile):
         super().__init__(size, x, y)
         self.frames_sprite = work_with_many_nestings(path)
         self.index_frame = 0
-        self.cur_image_frame_sprite_ = self.frames_sprite[self.index_frame]
+        if self.index_frame < len(self.frames_sprite) > 0:
+            self.cur_image_frame_sprite = self.frames_sprite[self.index_frame]
 
     def moving_frames_sprite(self):
         self.index_frame += 0.15
-        if self.index_frame >= len(self.frames_sprite):
-            self.index_frame = 0
-        self.image = self.frames_sprite[int(self.index_frame)]
+        if len(self.frames_sprite) > 0:
+            if self.index_frame >= len(self.frames_sprite):
+                self.index_frame = 0
+                self.image = self.frames_sprite[int(self.index_frame)]
+            else:
+                self.image = self.frames_sprite[int(self.index_frame)]
 
     def update(self, shift):
         self.moving_frames_sprite()
@@ -53,5 +58,54 @@ class Coin(Tile_With_Animation):
         super().__init__(size, x, y, path)
         mid_x = TILE_SIZE // 2 + int(size // 2) + x
         mid_y = TILE_SIZE // 2 + int(size // 2) + y
-        self.rect = self.image.get_rect(center=(mid_x, mid_y))
+        self.rect = self.image.get_rect(bottomleft=(mid_x, mid_y))
+
+
+class Enemy_Only_X(Tile_With_Animation):
+    def __init__(self, size, x, y, speed):
+        super().__init__(size, x, y, 'images/enemy/enemy_is_running')
+        # size // 4 - необходимо для травы
+        self.rect.y += (size - self.image.get_size()[1]) + size // 4
+        self.speed = speed
+
+    def is_moving(self):
+        self.rect.x += self.speed
+
+    def reverse_image(self):
+        if self.speed > 0:
+            # отражаем изображение по горизонтали, по вертикали тоже самое
+            self.image = pygame.transform.flip(self.image, True, False)
+
+    def set_reverse_speed(self):
+        self.speed = self.speed * (-1)
+
+    def reverse(self):
+        self.set_reverse_speed()
+        self.reverse_image()
+
+    def update(self, shift):
+        self.rect.x += shift
+        self.moving_frames_sprite()
+        self.is_moving()
+
+
+class Enemy_Fighting(Tile_With_Animation):
+    def __init__(self, size, x, y, speed=5):
+        super().__init__(size, x, y, 'images/enemy/enemy1_is_running')
+        self.rect.y += size - self.image.get_rect()[1]
+        self.speed = speed
+        self.index_frame_fighting = 0
+        path_for_fighting_sprite = 'images/enemy/enemy1_is_running/fight'
+        self.fighting_frames_sprite = work_with_many_nestings(path_for_fighting_sprite)
+        self.cur_fighting_frame_sprite_ = self.frames_sprite[self.index_frame]
+
+    def moving(self):
+        self.rect.x += self.speed
+
+    def is_fighting(self):
+        self.index_frame_fighting += 0.5
+        if self.index_frame_fighting >= len(self.fighting_frames_sprite):
+            self.index_frame_fighting = 0
+        self.image = self.fighting_frames_sprite[int(self.index_frame_fighting)]
+
 

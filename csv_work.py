@@ -34,6 +34,7 @@ def work_with_many_nestings(path):
             to_images_path = path + '/' + image
             surface_image = pygame.image.load(to_images_path).convert_alpha()
             surface_images.append(surface_image)
+            print(to_images_path)
     return surface_images
 
 
