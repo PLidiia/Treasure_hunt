@@ -2,14 +2,13 @@ from csv_work import import_csv_layout, import_cutting_tiles
 import random
 
 from Constants import *
-from Tile import StaticTile, Boxes, Coin, Enemy_Only_X, Tile
+from Tile import StaticTile, Boxes, Coin, Enemy_Only_X, Tile, Enemy_Fighting
 from csv_work import import_csv_layout, import_cutting_tiles
-
 
 class Level:
     def __init__(self, level_data):
         self.count_world_shift = -5
-        self.world_shift = -5
+        self.world_shift = 0
         terrain_layout = import_csv_layout(level_data['terrain'])
         self.terrain_sprites = self.create_tile_group(terrain_layout, 'terrain')
         grass_layout = import_csv_layout(level_data['grass'])
@@ -22,6 +21,12 @@ class Level:
         self.enemies_sprites = self.create_tile_group(enemies_layout, 'enemies')
         const_blocs_layout = import_csv_layout(level_data['const'])
         self.const_blocs_sprites = self.create_tile_group(const_blocs_layout, 'const')
+        coords_sprites = []
+        for sprite in self.enemies_sprites:
+            x = sprite.rect.x
+            y = sprite.rect.y
+            coords_sprites.append((x, y))
+        self.enemies_fighters_sprites = self.create_without_tile_group(coords_sprites)
         self.start_boxes_coords = []
 
     def create_tile_group(self, layout, type):
@@ -50,14 +55,23 @@ class Level:
                         sprite = Coin(TILE_SIZE, x, y, 'images/terrain/coins_frames')
 
                     if type == 'enemies':
-                        sprite = Enemy_Only_X(TILE_SIZE, x, y, 5)
+                        sprite = Enemy_Only_X(TILE_SIZE, x, y, 2)
 
                     if type == 'const':
                         sprite = Tile(TILE_SIZE, x, y)
-
                     sprite_group.add(sprite)
 
         return sprite_group
+
+    def create_without_tile_group(self, coords):
+        enemies_fighters_sprites = pygame.sprite.Group()
+        count_enemies_fighters = random.randint(2, 5)
+        for count in range(count_enemies_fighters):
+            for sprite_coord in coords:
+                x, y = sprite_coord
+                sprite = Enemy_Fighting(TILE_SIZE, x, y, 5)
+                enemies_fighters_sprites.add(sprite)
+        return enemies_fighters_sprites
 
     def enemy_collision_with_blocks(self):
         for enemy_sprite in self.enemies_sprites.sprites():
@@ -109,6 +123,8 @@ class Level:
             self.coins_sprites.draw(screen)
 
             self.enemies_sprites.update(self.world_shift)
+            self.enemies_fighters_sprites.update(self.world_shift)
+            self.enemies_fighters_sprites.draw(screen)
             self.const_blocs_sprites.update(self.world_shift)
             self.enemy_collision_with_blocks()
             self.enemies_sprites.draw(screen)
