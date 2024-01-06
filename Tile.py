@@ -88,8 +88,7 @@ class Enemy_Only_X(Tile_With_Animation):
 class Enemy_Fighting(Tile_With_Animation):
     def __init__(self, size, x, y, speed=2):
         super().__init__(size, x, y, 'images/enemy/enemy1_is_running/run')
-        size = 25
-        self.rect.y += size - self.image.get_rect()[1]
+        self.rect = self.image.get_rect(bottomleft=(x - self.rect.width, (y - self.rect.height) + 15))
         self.speed = speed
         self.index_frame_fighting = 0
         path_for_fighting_sprite = 'images/enemy/enemy1_is_running/fight'
@@ -104,3 +103,17 @@ class Enemy_Fighting(Tile_With_Animation):
         if self.index_frame_fighting >= len(self.fighting_frames_sprite):
             self.index_frame_fighting = 0
         self.image = self.fighting_frames_sprite[int(self.index_frame_fighting)]
+
+    def reverse_image(self):
+        if self.speed < 0:
+            # отражаем изображение по горизонтали, по вертикали тоже самое
+            self.image = pygame.transform.flip(self.image, True, False)
+
+    def reverse(self):
+        self.speed *= -1
+
+    def update(self, shift):
+        self.rect.x += shift
+        self.moving_frames_sprite()
+        self.moving()
+        self.reverse_image()

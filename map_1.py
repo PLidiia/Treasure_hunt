@@ -69,12 +69,13 @@ class Level:
         for count in range(count_enemies_fighters):
             for sprite_coord in coords:
                 x, y = sprite_coord
+                print(x, y)
                 sprite = Enemy_Fighting(TILE_SIZE, x, y, 5)
                 enemies_fighters_sprites.add(sprite)
         return enemies_fighters_sprites
 
-    def enemy_collision_with_blocks(self):
-        for enemy_sprite in self.enemies_sprites.sprites():
+    def enemy_collision_with_blocks(self, group_sprites):
+        for enemy_sprite in group_sprites.sprites():
             # если враги добежали до ограничавающих блоков констант на каждом куске treasure (земли) они расположены
             if pygame.sprite.spritecollide(enemy_sprite, self.const_blocs_sprites, False):
                 enemy_sprite.reverse()
@@ -124,9 +125,10 @@ class Level:
 
             self.enemies_sprites.update(self.world_shift)
             self.enemies_fighters_sprites.update(self.world_shift)
-            self.enemies_fighters_sprites.draw(screen)
             self.const_blocs_sprites.update(self.world_shift)
-            self.enemy_collision_with_blocks()
+            self.enemy_collision_with_blocks(self.enemies_sprites)
             self.enemies_sprites.draw(screen)
+            self.enemy_collision_with_blocks(self.enemies_fighters_sprites)
+            self.enemies_fighters_sprites.draw(screen)
             pygame.display.update()
 
