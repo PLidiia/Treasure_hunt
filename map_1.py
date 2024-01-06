@@ -1,12 +1,14 @@
-import pygame
 from csv_work import import_csv_layout, import_cutting_tiles
-from Constants import *
-from Tile import StaticTile, Boxes, Tile_With_Animation
 import random
+
+from Constants import *
+from Tile import StaticTile, Boxes, Coin
+from csv_work import import_csv_layout, import_cutting_tiles
+
 
 class Level:
     def __init__(self, level_data):
-        self.count_world_shift = 0
+        self.count_world_shift = -5
         self.world_shift = -5
         terrain_layout = import_csv_layout(level_data['terrain'])
         self.terrain_sprites = self.create_tile_group(terrain_layout, 'terrain')
@@ -41,7 +43,7 @@ class Level:
                         sprite = Boxes(TILE_SIZE, x, y)
 
                     if type == 'coins':
-                        sprite = Tile_With_Animation(TILE_SIZE, x, y, 'images/terrain/coins_frames')
+                        sprite = Coin(TILE_SIZE, x, y, 'images/terrain/coins_frames')
                     sprite_group.add(sprite)
 
         return sprite_group
@@ -70,7 +72,7 @@ class Level:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-            screen.fill(DARK_GREEN)
+            screen.fill(BLACK)
             clock.tick(FPS)
             if len(self.start_boxes_coords) == 0:
                 start_boxes_coords = self.work_with_coords_sprites_boxes()
@@ -85,5 +87,5 @@ class Level:
             self.boxes_sprites.draw(screen)
             self.coins_sprites.update(self.world_shift)
             self.coins_sprites.draw(screen)
-            self.count_world_shift += 1
             pygame.display.update()
+

@@ -1,9 +1,10 @@
 import pygame
 from csv_work import work_with_many_nestings
+from Constants import *
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, size, x, y):
-        pygame.sprite.Sprite.__init__(self)
+        super().__init__()
         self.image = pygame.Surface((size, size))
         self.rect = self.image.get_rect(topleft=(x, y))
 
@@ -32,20 +33,25 @@ class Boxes(StaticTile):
 class Tile_With_Animation(Tile):
     def __init__(self, size, x, y, path):
         super().__init__(size, x, y)
-        self.factor_for_moving = 0.15
         self.frames_sprite = work_with_many_nestings(path)
-        self.default_index_frame = 0
         self.index_frame = 0
         self.cur_image_frame_sprite_ = self.frames_sprite[self.index_frame]
 
     def moving_frames_sprite(self):
-        self.index_frame += self.factor_for_moving
-        if self.index_frame < len(self.frames_sprite):
-            self.cur_image_frame_sprite_ = self.frames_sprite[int(self.index_frame)]
-        else:
-            # дошли до конца, значит начинаем сначала менять кадры изображения данного спрайта
-            self.index_frame = self.default_index_frame
+        self.index_frame += 0.15
+        if self.index_frame >= len(self.frames_sprite):
+            self.index_frame = 0
+        self.image = self.frames_sprite[int(self.index_frame)]
 
     def update(self, shift):
         self.moving_frames_sprite()
         self.rect.x += shift
+
+
+class Coin(Tile_With_Animation):
+    def __init__(self, size, x, y, path):
+        super().__init__(size, x, y, path)
+        mid_x = TILE_SIZE // 2 + int(size // 2) + x
+        mid_y = TILE_SIZE // 2 + int(size // 2) + y
+        self.rect = self.image.get_rect(center=(mid_x, mid_y))
+

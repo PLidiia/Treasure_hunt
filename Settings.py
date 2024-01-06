@@ -46,17 +46,13 @@ class Setting:
                                         self.translate_fields_settings[0],
                                         'images/button_image.png')
         button_choice_language.draw(screen)
-        button_save_changes = Button(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - button_choice_language.rect.height + 40
-                                     , 250, 60, self.translate_fields_settings[1],
-                                     'images/button_image.png')
-        button_save_changes.draw(screen)
         button_back_to_menu = Button(10, 10, 250, 60, self.translate_fields_settings[2],
                                      'images/button_image.png')
         button_back_to_menu.draw(screen)
         button_music = Button(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 280, 250, 60, self.translate_fields_settings[3],
                               'images/button_image.png')
         button_music.draw(screen)
-        return [button_choice_language, button_save_changes, button_back_to_menu, button_music]
+        return [button_choice_language, '', button_back_to_menu, button_music]
 
     def draw_language_menu(self, screen, buttons):
         margin = buttons[0].rect.width
