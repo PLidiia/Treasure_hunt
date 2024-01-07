@@ -21,7 +21,7 @@ def import_cutting_tiles(path):
         for col in range(tile_num_y):
             x = col * TILE_SIZE
             y = row * TILE_SIZE
-            new_surface = pygame.Surface((TILE_SIZE, TILE_SIZE))
+            new_surface = pygame.Surface((TILE_SIZE, TILE_SIZE), flags=pygame.SRCALPHA)
             new_surface.blit(surface, (0, 0), pygame.Rect(x, y, TILE_SIZE, TILE_SIZE))
             cut_tiles.append(new_surface)
     return cut_tiles
@@ -34,7 +34,6 @@ def work_with_many_nestings(path):
             to_images_path = path + '/' + image
             surface_image = pygame.image.load(to_images_path).convert_alpha()
             surface_images.append(surface_image)
-            print(to_images_path)
     return surface_images
 
 

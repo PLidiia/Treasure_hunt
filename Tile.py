@@ -1,3 +1,5 @@
+import random
+
 from Constants import *
 from csv_work import work_with_many_nestings
 
@@ -86,10 +88,10 @@ class Enemy_Only_X(Tile_With_Animation):
 
 
 class Enemy_Fighting(Tile_With_Animation):
-    def __init__(self, size, x, y, speed=2):
+    def __init__(self, size, x, y):
         super().__init__(size, x, y, 'images/enemy/enemy1_is_running/run')
         self.rect.y = y - self.rect.height + 15
-        self.speed = speed
+        self.speed = random.randint(1, 4)
         self.index_frame_fighting = 0
         path_for_fighting_sprite = 'images/enemy/enemy1_is_running/fight'
         self.fighting_frames_sprite = work_with_many_nestings(path_for_fighting_sprite)

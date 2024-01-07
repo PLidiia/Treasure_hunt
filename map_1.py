@@ -2,13 +2,14 @@ import random
 
 from Constants import *
 from Tile import StaticTile, Boxes, Coin, Enemy_Only_X, Tile, Enemy_Fighting
+from User import Player
 from csv_work import import_csv_layout, import_cutting_tiles
 
 
 class Level:
     def __init__(self, level_data):
         self.count_world_shift = -5
-        self.world_shift = -2
+        self.world_shift = 0
         terrain_layout = import_csv_layout(level_data['terrain'])
         self.terrain_sprites = self.create_tile_group(terrain_layout, 'terrain')
         grass_layout = import_csv_layout(level_data['grass'])
@@ -21,13 +22,27 @@ class Level:
         self.enemies_sprites = self.create_tile_group(enemies_layout, 'enemies')
         const_blocs_layout = import_csv_layout(level_data['const'])
         self.const_blocs_sprites = self.create_tile_group(const_blocs_layout, 'const')
-        coords_sprites = []
+        enemies_coords_sprites = []
         for sprite in self.enemies_sprites:
             x = sprite.rect.x
             y = sprite.rect.y
-            coords_sprites.append((x, y))
-        self.enemies_fighters_sprites = self.create_without_tile_group(coords_sprites)
+            enemies_coords_sprites.append((x, y))
+        self.enemies_fighters_sprites = self.create_without_tile_group(enemies_coords_sprites)
+        single_player = 1
+        if single_player == 1:
+            for sprite in self.terrain_sprites:
+                x = sprite.rect.x
+                y = sprite.rect.y
+                self.player = self.player_spawn((x, y))
+                single_player = 0
         self.start_boxes_coords = []
+        self.image_background = pygame.image.load("images/terrain/background.jpg")
+
+    def player_spawn(self, coords):
+        player = pygame.sprite.Group()
+        sprite_player = Player(coords)
+        player.add(sprite_player)
+        return player
 
     def create_tile_group(self, layout, type):
         sprite_group = pygame.sprite.Group()
@@ -68,10 +83,8 @@ class Level:
         count_enemies_fighters = 2
         for sprite_coord in coords:
             if count_enemies_fighters > 0:
-                print(count_enemies_fighters)
                 x, y = sprite_coord
-                print(x, y)
-                sprite = Enemy_Fighting(TILE_SIZE, x, y, 2)
+                sprite = Enemy_Fighting(TILE_SIZE, x, y)
                 enemies_fighters_sprites.add(sprite)
                 count_enemies_fighters -= 1
         return enemies_fighters_sprites
@@ -106,7 +119,7 @@ class Level:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-            screen.fill(BLACK)
+            screen.blit(self.image_background, (0, 0))
             clock.tick(FPS)
             if len(self.start_boxes_coords) == 0:
                 start_boxes_coords = self.work_with_coords_sprites_boxes()
@@ -130,8 +143,10 @@ class Level:
             self.enemies_fighters_sprites.update(self.world_shift)
             self.enemy_collision_with_blocks(self.enemies_sprites)
             self.enemy_collision_with_blocks(self.enemies_fighters_sprites)
-            self.const_blocs_sprites.draw(screen)
             self.enemies_sprites.draw(screen)
             self.enemies_fighters_sprites.draw(screen)
+
+            self.player.update()
+            self.player.draw(screen)
 
             pygame.display.update()
