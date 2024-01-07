@@ -1,14 +1,14 @@
-from csv_work import import_csv_layout, import_cutting_tiles
 import random
 
 from Constants import *
 from Tile import StaticTile, Boxes, Coin, Enemy_Only_X, Tile, Enemy_Fighting
 from csv_work import import_csv_layout, import_cutting_tiles
 
+
 class Level:
     def __init__(self, level_data):
         self.count_world_shift = -5
-        self.world_shift = 0
+        self.world_shift = -2
         terrain_layout = import_csv_layout(level_data['terrain'])
         self.terrain_sprites = self.create_tile_group(terrain_layout, 'terrain')
         grass_layout = import_csv_layout(level_data['grass'])
@@ -65,13 +65,15 @@ class Level:
 
     def create_without_tile_group(self, coords):
         enemies_fighters_sprites = pygame.sprite.Group()
-        count_enemies_fighters = random.randint(2, 5)
-        for count in range(count_enemies_fighters):
-            for sprite_coord in coords:
+        count_enemies_fighters = 2
+        for sprite_coord in coords:
+            if count_enemies_fighters > 0:
+                print(count_enemies_fighters)
                 x, y = sprite_coord
                 print(x, y)
-                sprite = Enemy_Fighting(TILE_SIZE, x, y, 5)
+                sprite = Enemy_Fighting(TILE_SIZE, x, y, 2)
                 enemies_fighters_sprites.add(sprite)
+                count_enemies_fighters -= 1
         return enemies_fighters_sprites
 
     def enemy_collision_with_blocks(self, group_sprites):
@@ -123,12 +125,13 @@ class Level:
             self.coins_sprites.update(self.world_shift)
             self.coins_sprites.draw(screen)
 
+            self.const_blocs_sprites.update(self.world_shift)
             self.enemies_sprites.update(self.world_shift)
             self.enemies_fighters_sprites.update(self.world_shift)
-            self.const_blocs_sprites.update(self.world_shift)
             self.enemy_collision_with_blocks(self.enemies_sprites)
-            self.enemies_sprites.draw(screen)
             self.enemy_collision_with_blocks(self.enemies_fighters_sprites)
+            self.const_blocs_sprites.draw(screen)
+            self.enemies_sprites.draw(screen)
             self.enemies_fighters_sprites.draw(screen)
-            pygame.display.update()
 
+            pygame.display.update()

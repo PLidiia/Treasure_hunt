@@ -88,7 +88,7 @@ class Enemy_Only_X(Tile_With_Animation):
 class Enemy_Fighting(Tile_With_Animation):
     def __init__(self, size, x, y, speed=2):
         super().__init__(size, x, y, 'images/enemy/enemy1_is_running/run')
-        self.rect = self.image.get_rect(bottomleft=(x - self.rect.width, (y - self.rect.height) + 15))
+        self.rect.y = y - self.rect.height + 15
         self.speed = speed
         self.index_frame_fighting = 0
         path_for_fighting_sprite = 'images/enemy/enemy1_is_running/fight'
