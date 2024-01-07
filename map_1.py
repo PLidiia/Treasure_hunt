@@ -9,7 +9,7 @@ from csv_work import import_csv_layout, import_cutting_tiles
 class Level:
     def __init__(self, level_data):
         self.count_world_shift = -5
-        self.world_shift = 0
+        self.world_shift = -5
         terrain_layout = import_csv_layout(level_data['terrain'])
         self.terrain_sprites = self.create_tile_group(terrain_layout, 'terrain')
         grass_layout = import_csv_layout(level_data['grass'])
