@@ -4,12 +4,12 @@ from Constants import *
 from Tile import StaticTile, Boxes, Coin, Enemy_Only_X, Tile, Enemy_Fighting
 from User import Player
 from csv_work import import_csv_layout, import_cutting_tiles
-
+from Camera import chase_about_camera
 
 class Level:
     def __init__(self, level_data):
         self.count_world_shift = -5
-        self.world_shift = -5
+        self.world_shift = 0
         terrain_layout = import_csv_layout(level_data['terrain'])
         self.terrain_sprites = self.create_tile_group(terrain_layout, 'terrain')
         grass_layout = import_csv_layout(level_data['grass'])
@@ -22,27 +22,28 @@ class Level:
         self.enemies_sprites = self.create_tile_group(enemies_layout, 'enemies')
         const_blocs_layout = import_csv_layout(level_data['const'])
         self.const_blocs_sprites = self.create_tile_group(const_blocs_layout, 'const')
+        player_layout = import_csv_layout(level_data['player'])
+        self.player = pygame.sprite.GroupSingle()
+        self.player_setup(player_layout)
         enemies_coords_sprites = []
         for sprite in self.enemies_sprites:
             x = sprite.rect.x
             y = sprite.rect.y
             enemies_coords_sprites.append((x, y))
         self.enemies_fighters_sprites = self.create_without_tile_group(enemies_coords_sprites)
-        single_player = 1
-        if single_player == 1:
-            for sprite in self.terrain_sprites:
-                x = sprite.rect.x
-                y = sprite.rect.y
-                self.player = self.player_spawn((x, y))
-                single_player = 0
         self.start_boxes_coords = []
         self.image_background = pygame.image.load("images/terrain/background.jpg")
+        self.special_flag = 'Treasure'
 
-    def player_spawn(self, coords):
-        player = pygame.sprite.Group()
-        sprite_player = Player(coords)
-        player.add(sprite_player)
-        return player
+
+    def player_setup(self, layout):
+        for row_index, row in enumerate(layout):
+            for col_index, val in enumerate(row):
+                x = col_index * TILE_SIZE
+                y = row_index * TILE_SIZE
+                if val == '0':
+                    sprite = Player((x, y))
+                    self.player.add(sprite)
 
     def create_tile_group(self, layout, type):
         sprite_group = pygame.sprite.Group()
@@ -105,10 +106,23 @@ class Level:
 
     def record_secret_box(self):
         special_num = random.randint(0, 9)
-        special_flag = 'Treasure'
         for box_count in range(0, len(self.start_boxes_coords) - 1):
             if box_count == special_num:
-                self.start_boxes_coords[box_count][2] = special_flag
+                self.start_boxes_coords[box_count][2] = self.special_flag
+
+    def make_list_x_coord_boxes(self):
+        x_coords_boxes = []
+        for box_info in self.start_boxes_coords:
+            x = box_info[0]
+            x_coords_boxes.append(x)
+            x_coords_boxes.append(x + 10)
+            x_coords_boxes.append(x - 10)
+        return x_coords_boxes
+
+    def check_box_about_treasure(self):
+        for box_count in range(0, len(self.start_boxes_coords) - 1):
+            if self.start_boxes_coords[box_count][2] == self.special_flag:
+                print('УРААААААА')
 
     def run(self):
         running = True
@@ -126,8 +140,22 @@ class Level:
                 self.start_boxes_coords = start_boxes_coords
                 self.record_secret_box()
                 self.start_boxes_coords = start_boxes_coords
+                x_coords = self.make_list_x_coord_boxes()
+                for box_count in range(0, len(self.start_boxes_coords) - 1):
+                    if self.start_boxes_coords[box_count][2] == self.special_flag:
+                        print(self.start_boxes_coords[box_count])
+                        print('YES')
             self.terrain_sprites.update(self.world_shift)
             self.terrain_sprites.draw(screen)
+
+            self.player.update()
+            self.world_shift = chase_about_camera(self.player, self.player.sprite.direction_moving)
+            self.player.draw(screen)
+            if self.player.sprite.search_box:
+                if self.player.sprite.rect.x in x_coords:
+                    self.check_box_about_treasure()
+
+
 
             self.grass_sprites.update(self.world_shift)
             self.grass_sprites.draw(screen)
@@ -145,8 +173,5 @@ class Level:
             self.enemy_collision_with_blocks(self.enemies_fighters_sprites)
             self.enemies_sprites.draw(screen)
             self.enemies_fighters_sprites.draw(screen)
-
-            self.player.update()
-            self.player.draw(screen)
 
             pygame.display.update()
