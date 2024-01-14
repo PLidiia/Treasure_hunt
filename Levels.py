@@ -44,7 +44,7 @@ class choice_levels:
                 if event.type == pygame.QUIT:
                     running = False
                 elif event.type == pygame.MOUSEBUTTONDOWN and buttons[0].check_click(pygame.mouse.get_pos()):
-                    level_1 = Level(Level_1)
+                    level_1 = Level(Level_1, self.name_user)
                     level_1.run()
             if self.alpha > 0:
                 self.alpha = screensaver_before_work(screen, self.alpha, 2)

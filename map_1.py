@@ -1,13 +1,18 @@
 import random
+import sqlite3
+import time
 
+from Camera import chase_about_camera
 from Constants import *
+from Finish_window import Finish
 from Tile import StaticTile, Boxes, Coin, Enemy_Only_X, Tile, Enemy_Fighting
 from User import Player
 from csv_work import import_csv_layout, import_cutting_tiles
-from Camera import chase_about_camera
+
 
 class Level:
-    def __init__(self, level_data):
+    def __init__(self, level_data, name):
+        self.name = name
         self.count_world_shift = -5
         self.world_shift = 0
         terrain_layout = import_csv_layout(level_data['terrain'])
@@ -26,6 +31,14 @@ class Level:
         self.player = pygame.sprite.GroupSingle()
         self.player_setup(player_layout)
         enemies_coords_sprites = []
+        self.current_x = None
+        self.con = sqlite3.connect('database/users.db')
+        cur = self.con.cursor()
+        cur.execute("""CREATE TABLE IF NOT EXISTS RESULT (
+                    name TEXT,
+                    coins TEXT,
+                    time TEXT
+                )""")
         for sprite in self.enemies_sprites:
             x = sprite.rect.x
             y = sprite.rect.y
@@ -34,7 +47,9 @@ class Level:
         self.start_boxes_coords = []
         self.image_background = pygame.image.load("images/terrain/background.jpg")
         self.special_flag = 'Treasure'
-
+        self.count_scores = 0
+        self.start_time = time.time()
+        self.scores_field = 'Количество очков'
 
     def player_setup(self, layout):
         for row_index, row in enumerate(layout):
@@ -42,11 +57,12 @@ class Level:
                 x = col_index * TILE_SIZE
                 y = row_index * TILE_SIZE
                 if val == '0':
-                    sprite = Player((x, y))
+                    sprite = Player((x, y - 25))
                     self.player.add(sprite)
 
     def create_tile_group(self, layout, type):
         sprite_group = pygame.sprite.Group()
+        border_make_left = False
         for row_index, row in enumerate(layout):
             for col_index, val in enumerate(row):
                 if val != '-1':
@@ -122,10 +138,56 @@ class Level:
     def check_box_about_treasure(self):
         for box_count in range(0, len(self.start_boxes_coords) - 1):
             if self.start_boxes_coords[box_count][2] == self.special_flag:
-                print('УРААААААА')
+                end_time = time.time()
+                diff = end_time - self.start_time
+                cur = self.con.cursor()
+                cur.execute("INSERT INTO RESULT (name, coins, time) VALUES (?, ?, ?)",
+                            (self.name, self.count_scores, int(diff)))
+                self.con.commit()
+                finish = Finish(self.count_scores, self.name)
+                finish.run()
+
+    def collision(self):
+        player = self.player.sprite
+        player.rect.x += player.direction_moving.x * player.stamina
+        collidable_sprites = self.terrain_sprites.sprites()
+        for sprite in collidable_sprites:
+            if sprite.rect.colliderect(player.rect):
+                if player.direction_moving.x < 0:
+                    player.rect.left = sprite.rect.right
+                elif player.direction_moving.x > 0:
+                    player.rect.right = sprite.rect.left
+
+    def collision_coin(self):
+        player = self.player.sprite
+        for sprite in self.coins_sprites.sprites():
+            if player.rect.colliderect(sprite.rect):
+                sprite.kill()
+                self.count_scores += 1
+
+    def vertical_collision(self):
+        player = self.player.sprite
+        if player.rect.y < 8:
+            player.rect.y = 8
+        elif player.rect.y > 500:
+            player.rect.y = 500
+
+    def horizontal_collision(self):
+        player = self.player.sprite
+        if player.rect.x < 8:
+            player.rect.x = 8
+        elif player.rect.x > 920:
+            player.rect.x = 920
+
+    def write_text(self, screen):
+        text = FONT_24.render(str(self.count_scores), True, WHITE)
+        screen.blit(text, (10, 10))
+        text = FONT_24.render(self.scores_field, True, WHITE)
+        screen.blit(text, (10, 40))
 
     def run(self):
         running = True
+        self.start = time.time()
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption('Карта 1')
         clock = pygame.time.Clock()
@@ -147,15 +209,15 @@ class Level:
                         print('YES')
             self.terrain_sprites.update(self.world_shift)
             self.terrain_sprites.draw(screen)
-
             self.player.update()
             self.world_shift = chase_about_camera(self.player, self.player.sprite.direction_moving)
+            self.collision()
+            self.vertical_collision()
+            self.horizontal_collision()
             self.player.draw(screen)
             if self.player.sprite.search_box:
                 if self.player.sprite.rect.x in x_coords:
                     self.check_box_about_treasure()
-
-
 
             self.grass_sprites.update(self.world_shift)
             self.grass_sprites.draw(screen)
@@ -166,6 +228,9 @@ class Level:
             self.coins_sprites.update(self.world_shift)
             self.coins_sprites.draw(screen)
 
+            self.collision_coin()
+            self.write_text(screen)
+
             self.const_blocs_sprites.update(self.world_shift)
             self.enemies_sprites.update(self.world_shift)
             self.enemies_fighters_sprites.update(self.world_shift)
@@ -173,5 +238,4 @@ class Level:
             self.enemy_collision_with_blocks(self.enemies_fighters_sprites)
             self.enemies_sprites.draw(screen)
             self.enemies_fighters_sprites.draw(screen)
-
             pygame.display.update()

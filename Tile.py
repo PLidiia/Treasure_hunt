@@ -3,12 +3,15 @@ import random
 from Constants import *
 from csv_work import work_with_many_nestings
 
+all_sprites = pygame.sprite.Group()
+
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, size, x, y):
-        super().__init__()
+        super().__init__(all_sprites)
         self.image = pygame.Surface((size, size))
         self.rect = self.image.get_rect(topleft=(x, y))
+        self.mask = pygame.mask.from_surface(self.image)
 
     def update(self, shift):
         # двигаемся только по горизонтали, по вертикали координата с течением времени не меняется
