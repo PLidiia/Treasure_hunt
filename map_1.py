@@ -39,6 +39,10 @@ class Level:
         self.health_bar_top_left = (145, 137)
         self.health_bar_width = 312
         self.health_bar_hight = 50
+        self.max_health = 10
+        self.cur_health = self.max_health
+        self.one_shout_enemy = 1
+        self.one_shout_enemy_fighter = 2
         self.con = sqlite3.connect('database/users.db')
         cur = self.con.cursor()
         cur.execute("""CREATE TABLE IF NOT EXISTS RESULT (
@@ -193,6 +197,41 @@ class Level:
         elif player.rect.x > 920:
             player.rect.x = 920
 
+    def check_enemy_collision(self):
+        player = self.player.sprite
+        enemy_col = pygame.sprite.spritecollide(player, self.enemies_sprites, False)
+        enemy_fighters_col = pygame.sprite.spritecollide(player, self.enemies_fighters_sprites, False)
+        if enemy_col:
+            for sprite in enemy_col:
+                sprite_center = sprite.rect.centery
+                sprite_top = sprite.rect.top
+                player_bottom = player.rect.bottom
+                if sprite_top < player_bottom < sprite_center and player.direction_moving.y >= 0:
+                    sprite.kill()
+                    print('убит 1')
+                else:
+                    print('gggg')
+                    self.enemy_damage()
+
+        if enemy_fighters_col:
+            for sprite in enemy_fighters_col:
+                sprite_center = sprite.rect.centery
+                sprite_top = sprite.rect.top
+                player_bottom = player.rect.bottom
+                if sprite_top < player_bottom < sprite_center and player.direction_moving.y >= 0:
+                    sprite.kill()
+                    print('убит 2')
+                else:
+                    print('ggg')
+                    self.enemy_fighers_damage()
+
+
+    def enemy_damage(self):
+        self.cur_health -= self.one_shout_enemy
+
+    def enemy_fighers_damage(self):
+        self.cur_health -= self.one_shout_enemy_fighter
+
     def write_text(self, screen):
         text = FONT_24.render(str(self.count_scores), True, WHITE)
         screen.blit(text, (10, 10))
@@ -252,5 +291,7 @@ class Level:
             self.enemy_collision_with_blocks(self.enemies_fighters_sprites)
             self.enemies_sprites.draw(screen)
             self.enemies_fighters_sprites.draw(screen)
-            self.make_health_bar(10, 10, screen)
+
+            self.check_enemy_collision()
+            self.make_health_bar(self.max_health, self.cur_health, screen)
             pygame.display.update()
