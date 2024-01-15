@@ -2,6 +2,8 @@ import random
 import sqlite3
 import time
 
+import pygame.image
+
 from Camera import chase_about_camera
 from Constants import *
 from Finish_window import Finish
@@ -32,6 +34,11 @@ class Level:
         self.player_setup(player_layout)
         enemies_coords_sprites = []
         self.current_x = None
+        self.health_bar = pygame.image.load('images/health_bar.png')
+        self.health_bar = pygame.transform.rotozoom(self.health_bar, 0, 0.5)
+        self.health_bar_top_left = (145, 137)
+        self.health_bar_width = 312
+        self.health_bar_hight = 50
         self.con = sqlite3.connect('database/users.db')
         cur = self.con.cursor()
         cur.execute("""CREATE TABLE IF NOT EXISTS RESULT (
@@ -50,6 +57,13 @@ class Level:
         self.count_scores = 0
         self.start_time = time.time()
         self.scores_field = 'Количество очков'
+
+    def make_health_bar(self, cur, const, screen):
+        screen.blit(self.health_bar, (50, 100))
+        cur_health_player = const / cur
+        cur_width_bar = self.health_bar_width * cur_health_player
+        bar_rect = pygame.Rect(self.health_bar_top_left, (cur_width_bar, self.health_bar_hight))
+        pygame.draw.rect(screen, DARK_RED, bar_rect)
 
     def player_setup(self, layout):
         for row_index, row in enumerate(layout):
@@ -238,4 +252,5 @@ class Level:
             self.enemy_collision_with_blocks(self.enemies_fighters_sprites)
             self.enemies_sprites.draw(screen)
             self.enemies_fighters_sprites.draw(screen)
+            self.make_health_bar(10, 10, screen)
             pygame.display.update()
