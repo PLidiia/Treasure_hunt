@@ -2,16 +2,18 @@ from Constants import *
 
 
 class Finish:
-    def __init__(self, scores, name):
+    def __init__(self, scores, name, result_of_game):
         self.scores = scores
         self.name = name
+        self.result_of_game = result_of_game
 
     def draw_items(self, screen):
-        text = FONT_24.render(self.name, True, WHITE)
-        screen.blit(text, (10, 10))
-        text = FONT_24.render(str(self.scores), True, WHITE)
-        screen.blit(text, (100, 10))
-        text = FONT_38.render('Вы выиграли', True, WHITE)
+        if self.result_of_game != 'Вы проиграли':
+            text = FONT_24.render(self.name, True, WHITE)
+            screen.blit(text, (10, 10))
+            text = FONT_24.render(str(self.scores), True, WHITE)
+            screen.blit(text, (100, 10))
+        text = FONT_56.render(self.result_of_game, True, WHITE)
         screen.blit(text, (100, 50))
 
     def run(self):
@@ -27,5 +29,4 @@ class Finish:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-
             pygame.display.update()

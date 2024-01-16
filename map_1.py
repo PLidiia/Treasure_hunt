@@ -39,10 +39,10 @@ class Level:
         self.health_bar_top_left = (145, 137)
         self.health_bar_width = 312
         self.health_bar_hight = 50
-        self.max_health = 10
+        self.max_health = 700
         self.cur_health = self.max_health
-        self.one_shout_enemy = 1
-        self.one_shout_enemy_fighter = 2
+        self.one_shout_enemy = 4
+        self.one_shout_enemy_fighter = 8
         self.con = sqlite3.connect('database/users.db')
         cur = self.con.cursor()
         cur.execute("""CREATE TABLE IF NOT EXISTS RESULT (
@@ -61,6 +61,7 @@ class Level:
         self.count_scores = 0
         self.start_time = time.time()
         self.scores_field = 'Количество очков'
+        self.is_start = False
 
     def make_health_bar(self, cur, const, screen):
         screen.blit(self.health_bar, (50, 100))
@@ -68,6 +69,7 @@ class Level:
         cur_width_bar = self.health_bar_width * cur_health_player
         bar_rect = pygame.Rect(self.health_bar_top_left, (cur_width_bar, self.health_bar_hight))
         pygame.draw.rect(screen, DARK_RED, bar_rect)
+        return cur_width_bar
 
     def player_setup(self, layout):
         for row_index, row in enumerate(layout):
@@ -80,7 +82,6 @@ class Level:
 
     def create_tile_group(self, layout, type):
         sprite_group = pygame.sprite.Group()
-        border_make_left = False
         for row_index, row in enumerate(layout):
             for col_index, val in enumerate(row):
                 if val != '-1':
@@ -149,20 +150,19 @@ class Level:
         for box_info in self.start_boxes_coords:
             x = box_info[0]
             x_coords_boxes.append(x)
-            x_coords_boxes.append(x + 10)
-            x_coords_boxes.append(x - 10)
+            x_coords_boxes.append(x + 5)
+            x_coords_boxes.append(x - 5)
         return x_coords_boxes
 
     def check_box_about_treasure(self):
         for box_count in range(0, len(self.start_boxes_coords) - 1):
             if self.start_boxes_coords[box_count][2] == self.special_flag:
-                end_time = time.time()
-                diff = end_time - self.start_time
+                diff = time.time() - self.start_time
                 cur = self.con.cursor()
                 cur.execute("INSERT INTO RESULT (name, coins, time) VALUES (?, ?, ?)",
                             (self.name, self.count_scores, int(diff)))
                 self.con.commit()
-                finish = Finish(self.count_scores, self.name)
+                finish = Finish(self.count_scores, self.name, 'Вы выиграли')
                 finish.run()
 
     def collision(self):
@@ -200,31 +200,30 @@ class Level:
     def check_enemy_collision(self):
         player = self.player.sprite
         enemy_col = pygame.sprite.spritecollide(player, self.enemies_sprites, False)
-        enemy_fighters_col = pygame.sprite.spritecollide(player, self.enemies_fighters_sprites, False)
         if enemy_col:
             for sprite in enemy_col:
                 sprite_center = sprite.rect.centery
                 sprite_top = sprite.rect.top
                 player_bottom = player.rect.bottom
-                if sprite_top < player_bottom < sprite_center and player.direction_moving.y >= 0:
+                if sprite_top < player_bottom < sprite_center and player.direction_moving.y > 0 or \
+                        player.direction_moving.x > 0:
                     sprite.kill()
-                    print('убит 1')
                 else:
-                    print('gggg')
                     self.enemy_damage()
 
+    def check_enemy_fighters_collision(self):
+        player = self.player.sprite
+        enemy_fighters_col = pygame.sprite.spritecollide(player, self.enemies_fighters_sprites, False)
         if enemy_fighters_col:
             for sprite in enemy_fighters_col:
                 sprite_center = sprite.rect.centery
                 sprite_top = sprite.rect.top
                 player_bottom = player.rect.bottom
-                if sprite_top < player_bottom < sprite_center and player.direction_moving.y >= 0:
+                if sprite_top < player_bottom < sprite_center and player.direction_moving.y > 0 or \
+                        player.direction_moving.x > 0:
                     sprite.kill()
-                    print('убит 2')
                 else:
-                    print('ggg')
                     self.enemy_fighers_damage()
-
 
     def enemy_damage(self):
         self.cur_health -= self.one_shout_enemy
@@ -238,12 +237,18 @@ class Level:
         text = FONT_24.render(self.scores_field, True, WHITE)
         screen.blit(text, (10, 40))
 
+    def check_loss(self, len_bar):
+        if len_bar <= 0:
+            finish = Finish(self.count_scores, self.name, 'Вы проиграли')
+            finish.run()
+            return True
+
     def run(self):
-        running = True
         self.start = time.time()
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption('Карта 1')
         clock = pygame.time.Clock()
+        running = True
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -262,7 +267,7 @@ class Level:
                         print('YES')
             self.terrain_sprites.update(self.world_shift)
             self.terrain_sprites.draw(screen)
-            self.player.update()
+            self.player.update(self.terrain_sprites)
             self.world_shift = chase_about_camera(self.player, self.player.sprite.direction_moving)
             self.collision()
             self.vertical_collision()
@@ -293,5 +298,11 @@ class Level:
             self.enemies_fighters_sprites.draw(screen)
 
             self.check_enemy_collision()
-            self.make_health_bar(self.max_health, self.cur_health, screen)
+            cur_len_bar = self.make_health_bar(self.max_health, self.cur_health, screen)
+
+            self.check_enemy_fighters_collision()
+            cur_len_bar = self.make_health_bar(self.max_health, self.cur_health, screen)
+            self.check_loss(cur_len_bar)
+            if self.check_loss(cur_len_bar):
+                running = False
             pygame.display.update()

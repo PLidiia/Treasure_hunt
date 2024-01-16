@@ -87,7 +87,7 @@ class Enter:
         self.logo_img = pygame.transform.scale(self.logo_img, (400, 150))
         screen.blit(self.logo_img, ((SCREEN_WIDTH // 2 - self.logo_img.get_width() // 2),
                                     SCREEN_HEIGHT - self.logo_img.get_height() + 10))
-        button_name = Button(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 150, 250, 60, self.translate_fields_menu[11],
+        button_name = Button(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 150, 250, 60, self.translate_fields_menu[13],
                              'images/button_image.png')
         button_name.draw(screen)
         button_password = Button(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - button_name.rect.height + 40

@@ -1,5 +1,5 @@
 import pygame
-
+from Constants import *
 from csv_work import work_with_many_nestings
 
 all_sprites = pygame.sprite.Group()
@@ -28,10 +28,14 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(bottomleft=(self.x, self.y + 190))
         self.image = self.animations['walk'][self.index_frame]
         self.mask = pygame.mask.from_surface(self.image)
-        self.stamina = 2
+        self.stamina = 1
+        self.jump = False
+        self.air = False
+        self.shift = 1
         self.move_right = None
         self.move_left = None
         self.speed_jump = 2
+        self.vel_y = 0
         self.gravity = 1
         self.direction_moving = pygame.math.Vector2(0, 0)
 
@@ -49,8 +53,6 @@ class Player(pygame.sprite.Sprite):
             self.direction_moving.x = 0
         if keys[pygame.K_SPACE]:
             self.fly()
-        elif keys[pygame.K_DOWN]:
-            self.fall()
 
     def fly(self):
         for n in range(4):
@@ -73,10 +75,8 @@ class Player(pygame.sprite.Sprite):
         if self.direction_moving.x == -1:
             self.image = pygame.transform.flip(self.image, True, False)
 
-    def update(self):
+    def update(self, terrain_list):
         self.keyboard_input()
-        # обновляем положение фигуры, по тому на какие клавиши нажал пользователь
-        self.rect.x += self.direction_moving.x * self.stamina
         if self.direction_moving.x:
             self.moving()
             self.reverse_image()

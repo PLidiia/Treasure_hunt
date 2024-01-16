@@ -1,5 +1,4 @@
 import pygame.display
-import translate
 
 from Constants import *
 from Effects import screensaver_before_work
@@ -10,10 +9,6 @@ class Setting:
     def __init__(self, entry, list_fields):
         self.entry = entry
         self.list_fields_menu = list_fields
-        self.translator = translate.Translator(from_lang='ru', to_lang='ru')
-        self.change_translator = False
-        self.new_list_fields_menu = []
-        self.new_list_fields_settings = []
         self.turning = True
         self.alpha = 255
         choice_lang = 'Выберите язык'
@@ -27,19 +22,64 @@ class Setting:
         translate_fields_settings = [choice_lang, save_changes, back_to_menu, turn_music, english_lang,
                                      german_lang, french_lang, settings_menu]
         self.translate_fields_settings = translate_fields_settings
+        self.new_list_fields_menu_eng = ['Too long subject',
+                                         'Your account has been created. Please check your email for the verification',
+                                         'User with that name already exists', 'User name or password error',
+                                         'Weft insertion test',
+                                         'First issue',
+                                         'being deleted', 'Switch to LTR', 'Go to Dashboard', 'Commentary',
+                                         'Enter a password',
+                                         'Enter name', 'Settings', 'First name', 'Password',
+                                         'You have successfully logged in to your account', 'Password Field',
+                                         'The password must contain numbers.', 'The password must contain letters.',
+                                         'The password must contain letters.',
+                                         'The password must contain special characters.']
+        self.new_list_fields_setting_eng = ['Select language', 'Save Change', 'Return to the ', 'ON OFF', 'English',
+                                            'German', 'French', 'Menu Options']
+        self.new_list_fields_menu_de = ['Feld ist zu lang', 'Sie haben sich erfolgreich registriert',
+                                        'Benutzer existiert bereits!', 'Ungültiger Benutzername oder Passwort',
+                                        'Zur Passworteingabe gewechselt', 'Symbole eingeben', 'Löschen von Symbolen',
+                                        'Namenseintrag umschalten', 'Zu den Einstellungen wechseln', 'Kommentare',
+                                        'Geben Sie das Passwort ein', 'Name eingeben', 'Einstellungen', 'Vorname',
+                                        'Passwort',
+                                        'Sie haben sich erfolgreich angemeldet als', 'Leeres Passwort- oder Namensfeld',
+                                        'Das Passwort muss Zahlen beinhalten.',
+                                        'Das Passwort muss Großbuchstaben enthalten',
+                                        'Das Passwort muss Kleinbuchstaben enthalten',
+                                        'Das Passwort muss Sonderzeichen enthalten']
+        self.new_list_fields_setting_de = ['Wählen Sie eine Sprache ', 'Änderung speichern', 'Zurück zum Menü',
+                                           'Musik aktivieren deaktivieren',
+                                           'Englisch', 'Deutsch', 'Französisch', '"Menüeinstellungen"']
+        self.new_list_fields_menu_fr = ['Le champ est trop long', 'Vous vous êtes inscrit avec succès',
+                                        'Un utilisateur avec ce nom existe déjà',
+                                        "Nom d'utilisateur ou mot de passe non valide",
+                                        'Passé à la saisie du mot de passe', 'Saisie des symboles',
+                                        'Suppression de symboles',
+                                        'Basculer la saisie du nom', 'Passer aux paramètres', 'Commentaires',
+                                        'Saisir le mot de passe', 'Saisissez le nom', 'Paramètres', 'Prénom',
+                                        'Mot de passe',
+                                        'Vous vous êtes connecté avec succès en tant que',
+                                        'Mot de passe ou champ de nom vide',
+                                        'Le mot de passe doit contenir des chiffres',
+                                        'Le mot de passe doit contenir des lettres majuscules',
+                                        'Le mot de passe doit contenir des lettres minuscules',
+                                        'Le mot de passe doit contenir des caractères spéciaux']
 
-    def translate(self, to_lang, from_to_lang='ru'):
-        '''Существует проблема с долгим переводом, происходит зависание окна с подписью "не отвечает"
-        '''
-        translator = translate.Translator(from_lang=from_to_lang, to_lang=to_lang)
-        self.translator = translator
-        for field in self.list_fields_menu:
-            new_field = self.translator.translate(field)
-            self.new_list_fields_menu.append(new_field)
-        for field in self.translate_fields_settings:
-            new_field = self.translator.translate(field)
-            self.new_list_fields_settings.append(new_field)
-        self.translate_fields_settings = self.new_list_fields_settings
+        self.new_list_fields_setting_fr = ['Sélectionnez une langue.', 'Enregistrer la modification', 'Retour au menu',
+                                           'Activer Désactiver la musique', 'ANGLAIS', 'Allemand', 'Français',
+                                           'Paramètres du menu']
+
+    def translate(self, to_lang):
+        if to_lang == 'en':
+            self.translate_fields_settings = self.new_list_fields_setting_eng
+            self.list_fields_menu = self.new_list_fields_menu_eng
+            print(len(self.list_fields_menu))
+        elif to_lang == 'fr':
+            self.translate_fields_settings = self.new_list_fields_setting_fr
+            self.list_fields_menu = self.new_list_fields_menu_fr
+        elif to_lang == 'de':
+            self.translate_fields_settings = self.new_list_fields_setting_de
+            self.list_fields_menu = self.new_list_fields_menu_de
 
     def draw_buttons(self, screen):
         button_choice_language = Button(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 150, 250, 60,
@@ -69,18 +109,10 @@ class Setting:
         return [button_eng, button_german, button_fr]
 
     def field_to_menu(self):
-        return self.new_list_fields_menu
-
-    def check_was_launch(self):
-        return self.change_translator
+        return self.list_fields_menu
 
     def music_turn(self):
         self.turning = False
-
-    def return_field_settings(self):
-        if self.change_translator is True:
-            return self.new_list_fields_settings
-        return self.translate_fields_settings
 
     def run(self, fields=False):
         self.list_fields_menu = self.list_fields_menu if not fields else fields
@@ -105,17 +137,14 @@ class Setting:
                 if drawing_language_menu is True:
                     buttons_lang = self.draw_language_menu(screen, buttons_settings)
                     if buttons_lang[0].check_click(pygame.mouse.get_pos()):
-                        self.change_translator = True
                         self.translate('en')
                     elif buttons_lang[1].check_click(pygame.mouse.get_pos()):
-                        self.change_translator = True
                         self.translate('de')
                     elif buttons_lang[2].check_click(pygame.mouse.get_pos()):
-                        self.change_translator = True
                         self.translate('fr')
                 if event.type == pygame.QUIT:
                     self.entry.turning = self.turning
-                    self.entry.run(self.new_list_fields_menu)
+                    self.entry.run(self.list_fields_menu)
                     running = False
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if buttons_settings[0].check_click(pygame.mouse.get_pos()) is True:
@@ -123,7 +152,7 @@ class Setting:
                         drawing_language_menu = True
                     elif buttons_settings[2].check_click(pygame.mouse.get_pos()):
                         self.entry.turning = self.turning
-                        self.entry.run(self.new_list_fields_menu)
+                        self.entry.run(self.list_fields_menu)
                         running = False
                     elif buttons_settings[3].check_click(pygame.mouse.get_pos()):
                         self.turning = True
