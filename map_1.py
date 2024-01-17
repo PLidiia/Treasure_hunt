@@ -12,11 +12,13 @@ from User import Player
 from csv_work import import_csv_layout, import_cutting_tiles
 
 
-class Level:
-    def __init__(self, level_data, name):
+class Map:
+    def __init__(self, level_data, name, turn, language):
         self.name = name
         self.count_world_shift = -5
         self.world_shift = 0
+        self.turning = turn
+        self.language = language
         terrain_layout = import_csv_layout(level_data['terrain'])
         self.terrain_sprites = self.create_tile_group(terrain_layout, 'terrain')
         grass_layout = import_csv_layout(level_data['grass'])
@@ -61,7 +63,28 @@ class Level:
         self.count_scores = 0
         self.start_time = time.time()
         self.scores_field = 'Количество очков'
+        self.map_1 = 'Карта 1'
+        self.you_won = 'Вы выиграли'
+        self.you_lost = 'Вы проиграли'
+        self.final_window = 'Финальное окно'
+        self.final_window_en = 'Final Window'
+        self.final_window_de = 'Letztes Fenster'
+        self.final_window_fr = 'Fenêtre finale'
+        self.map_1_fields = [self.scores_field, self.map_1, self.you_won, self.you_lost, self.final_window]
+        self.map_1_fields_en = ['Score amount', 'Map 1', 'You won', 'You lose!']
+        self.map_1_fields_fr = ['Nombres de Points crédités', 'Carte 1.', 'Vous avez gagné !', 'Vous avez perdu']
+        self.map_1_fields_de = ['Punktestand', 'Karte 1', 'Sie haben gewonnen', 'Sie haben verloren']
+        if self.language == 'en':
+            self.map_1_fields = self.map_1_fields_en
+            self.final_window = self.final_window_en
+        elif self.language == 'de':
+            self.map_1_fields = self.map_1_fields_de
+            self.final_window = self.final_window_de
+        elif self.language == 'fr':
+            self.map_1_fields = self.map_1_fields_fr
+            self.final_window = self.final_window_fr
         self.is_start = False
+        self.sound_result = False
 
     def make_health_bar(self, cur, const, screen):
         screen.blit(self.health_bar, (50, 100))
@@ -155,6 +178,9 @@ class Level:
         return x_coords_boxes
 
     def check_box_about_treasure(self):
+        if self.turning is True:
+            pygame.mixer.music.load(os.path.join('music', 'check_box.mp3'))
+            pygame.mixer.music.play()
         for box_count in range(0, len(self.start_boxes_coords) - 1):
             if self.start_boxes_coords[box_count][2] == self.special_flag:
                 diff = time.time() - self.start_time
@@ -162,7 +188,11 @@ class Level:
                 cur.execute("INSERT INTO RESULT (name, coins, time) VALUES (?, ?, ?)",
                             (self.name, self.count_scores, int(diff)))
                 self.con.commit()
-                finish = Finish(self.count_scores, self.name, 'Вы выиграли')
+                if self.turning is True and self.sound_result is False:
+                    pygame.mixer.music.load(os.path.join('music', 'you_win.mp3'))
+                    pygame.mixer.music.play()
+                    self.sound_result = True
+                finish = Finish(self.count_scores, self.name, self.map_1_fields[2], )
                 finish.run()
 
     def collision(self):
@@ -181,6 +211,9 @@ class Level:
         for sprite in self.coins_sprites.sprites():
             if player.rect.colliderect(sprite.rect):
                 sprite.kill()
+                if self.turning is True:
+                    pygame.mixer.music.load(os.path.join('music', 'coin_update.mp3'))
+                    pygame.mixer.music.play()
                 self.count_scores += 1
 
     def vertical_collision(self):
@@ -208,6 +241,7 @@ class Level:
                 if sprite_top < player_bottom < sprite_center and player.direction_moving.y > 0 or \
                         player.direction_moving.x > 0:
                     sprite.kill()
+                    self.play_sound_death_enemy()
                 else:
                     self.enemy_damage()
 
@@ -222,6 +256,7 @@ class Level:
                 if sprite_top < player_bottom < sprite_center and player.direction_moving.y > 0 or \
                         player.direction_moving.x > 0:
                     sprite.kill()
+                    self.play_sound_death_enemy()
                 else:
                     self.enemy_fighers_damage()
 
@@ -239,14 +274,22 @@ class Level:
 
     def check_loss(self, len_bar):
         if len_bar <= 0:
-            finish = Finish(self.count_scores, self.name, 'Вы проиграли')
+            if self.turning is True:
+                pygame.mixer.music.load(os.path.join('music', 'gameover.mp3'))
+                pygame.mixer.music.play()
+            finish = Finish(self.count_scores, self.name, self.map_1_fields[3], self.final_window)
             finish.run()
             return True
+
+    def play_sound_death_enemy(self):
+        if self.turning is True:
+            pygame.mixer.music.load(os.path.join('music', 'death_enemy.mp3'))
+            pygame.mixer.music.play()
 
     def run(self):
         self.start = time.time()
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        pygame.display.set_caption('Карта 1')
+        pygame.display.set_caption(self.map_1_fields[1])
         clock = pygame.time.Clock()
         running = True
         while running:
@@ -261,10 +304,6 @@ class Level:
                 self.record_secret_box()
                 self.start_boxes_coords = start_boxes_coords
                 x_coords = self.make_list_x_coord_boxes()
-                for box_count in range(0, len(self.start_boxes_coords) - 1):
-                    if self.start_boxes_coords[box_count][2] == self.special_flag:
-                        print(self.start_boxes_coords[box_count])
-                        print('YES')
             self.terrain_sprites.update(self.world_shift)
             self.terrain_sprites.draw(screen)
             self.player.update(self.terrain_sprites)

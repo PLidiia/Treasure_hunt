@@ -53,6 +53,8 @@ class Player(pygame.sprite.Sprite):
             self.direction_moving.x = 0
         if keys[pygame.K_SPACE]:
             self.fly()
+        elif keys[pygame.K_DOWN]:
+            self.fall()
 
     def fly(self):
         for n in range(4):

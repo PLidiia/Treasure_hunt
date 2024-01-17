@@ -4,20 +4,21 @@ import pygame.mouse
 
 from Constants import *
 from Effects import screensaver_before_work
-from Levels import choice_levels
+from Levels import Choicer_Level
 from Settings import Setting
 from button import Button
 
 
 class Enter:
-    def __init__(self, turn):
+    def __init__(self, turn, language):
         self.icon = pygame.image.load(os.path.join('images', 'top_user.png'))
-        self.logo_img = pygame.image.load(os.path.join('images', 'logo.png'))
         self.alpha = 255
         self.turning = turn
+        self.language = language
         self.comments_special = 'Чтобы сохранить имя или пароль при окончание введения нажмите enter'
         self.blocks = []
         self.current_menu_index_block = 0
+        self.image_background = pygame.image.load("images/menu_background.png")
         self.con = sqlite3.connect('database/users.db')
         cur = self.con.cursor()
         cur.execute("""CREATE TABLE IF NOT EXISTS USERS (
@@ -84,9 +85,6 @@ class Enter:
         :param screen:
         :return:
         """
-        self.logo_img = pygame.transform.scale(self.logo_img, (400, 150))
-        screen.blit(self.logo_img, ((SCREEN_WIDTH // 2 - self.logo_img.get_width() // 2),
-                                    SCREEN_HEIGHT - self.logo_img.get_height() + 10))
         button_name = Button(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 150, 250, 60, self.translate_fields_menu[13],
                              'images/button_image.png')
         button_name.draw(screen)
@@ -120,7 +118,7 @@ class Enter:
         self.current_menu_index_block = max(0, index)
 
     def launch_choice_menu(self, name_user):
-        choicer = choice_levels(name_user)
+        choicer = Choicer_Level(name_user, self.language, self.turning)
         choicer.run()
 
     def counting_chars(self, your_password):
@@ -180,7 +178,7 @@ class Enter:
         one_message_about_switch = 0
         while running:
             clock.tick(FPS)
-            screen.fill(DARK_GREEN)
+            screen.blit(self.image_background, (0, 0))
             buttons = self.draw_items(screen)
             inputting_data = self.control_len_input_fields(password_intermed_save, name_intermed_save, screen)
             for event in pygame.event.get():

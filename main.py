@@ -6,7 +6,7 @@ def return_entry():
 
 
 if __name__ == "__main__":
-    entry = Enter(False)
+    entry = Enter(False, language='ru')
     entry.append_block_menu('Имя')
     entry.append_block_menu('Пароль')
     entry.append_block_menu('Настройки')

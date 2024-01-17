@@ -9,8 +9,10 @@ class Setting:
     def __init__(self, entry, list_fields):
         self.entry = entry
         self.list_fields_menu = list_fields
-        self.turning = True
+        self.turning = False
         self.alpha = 255
+        self.language = 'ru'
+        self.image_background = pygame.image.load("images/setting_background.png")
         choice_lang = 'Выберите язык'
         save_changes = 'Сохранить изменение'
         back_to_menu = 'Вернуться в меню'
@@ -73,7 +75,6 @@ class Setting:
         if to_lang == 'en':
             self.translate_fields_settings = self.new_list_fields_setting_eng
             self.list_fields_menu = self.new_list_fields_menu_eng
-            print(len(self.list_fields_menu))
         elif to_lang == 'fr':
             self.translate_fields_settings = self.new_list_fields_setting_fr
             self.list_fields_menu = self.new_list_fields_menu_fr
@@ -125,7 +126,7 @@ class Setting:
         while running:
             clock.tick(FPS)
             pygame.display.set_caption(self.translate_fields_settings[7])
-            screen.fill(DARK_GREEN)
+            screen.blit(self.image_background, (0, 0))
             if self.alpha > 0:
                 self.alpha = screensaver_before_work(screen, self.alpha, 5)
             text = FONT_38.render(self.translate_fields_settings[7], True, WHITE)
@@ -138,10 +139,13 @@ class Setting:
                     buttons_lang = self.draw_language_menu(screen, buttons_settings)
                     if buttons_lang[0].check_click(pygame.mouse.get_pos()):
                         self.translate('en')
+                        self.language = 'en'
                     elif buttons_lang[1].check_click(pygame.mouse.get_pos()):
                         self.translate('de')
+                        self.language = 'de'
                     elif buttons_lang[2].check_click(pygame.mouse.get_pos()):
                         self.translate('fr')
+                        self.language = 'fr'
                 if event.type == pygame.QUIT:
                     self.entry.turning = self.turning
                     self.entry.run(self.list_fields_menu)
@@ -152,6 +156,7 @@ class Setting:
                         drawing_language_menu = True
                     elif buttons_settings[2].check_click(pygame.mouse.get_pos()):
                         self.entry.turning = self.turning
+                        self.entry.language = self.language
                         self.entry.run(self.list_fields_menu)
                         running = False
                     elif buttons_settings[3].check_click(pygame.mouse.get_pos()):
