@@ -1,4 +1,3 @@
-import pygame
 from Constants import *
 from csv_work import work_with_many_nestings
 
@@ -77,7 +76,7 @@ class Player(pygame.sprite.Sprite):
         if self.direction_moving.x == -1:
             self.image = pygame.transform.flip(self.image, True, False)
 
-    def update(self, terrain_list):
+    def update(self):
         self.keyboard_input()
         if self.direction_moving.x:
             self.moving()

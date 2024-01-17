@@ -192,7 +192,7 @@ class Map:
                     pygame.mixer.music.load(os.path.join('music', 'you_win.mp3'))
                     pygame.mixer.music.play()
                     self.sound_result = True
-                finish = Finish(self.count_scores, self.name, self.map_1_fields[2], )
+                finish = Finish(self.count_scores, self.name, self.map_1_fields[2], self.final_window)
                 finish.run()
 
     def collision(self):
@@ -225,8 +225,8 @@ class Map:
 
     def horizontal_collision(self):
         player = self.player.sprite
-        if player.rect.x < 8:
-            player.rect.x = 8
+        if player.rect.x < 60:
+            player.rect.x = 60
         elif player.rect.x > 920:
             player.rect.x = 920
 
@@ -287,7 +287,6 @@ class Map:
             pygame.mixer.music.play()
 
     def run(self):
-        self.start = time.time()
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption(self.map_1_fields[1])
         clock = pygame.time.Clock()
@@ -306,7 +305,7 @@ class Map:
                 x_coords = self.make_list_x_coord_boxes()
             self.terrain_sprites.update(self.world_shift)
             self.terrain_sprites.draw(screen)
-            self.player.update(self.terrain_sprites)
+            self.player.update()
             self.world_shift = chase_about_camera(self.player, self.player.sprite.direction_moving)
             self.collision()
             self.vertical_collision()
